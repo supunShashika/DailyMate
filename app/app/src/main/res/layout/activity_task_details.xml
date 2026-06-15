@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="#F0F4F8">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add new task"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Title Input -->
+    <EditText
+        android:id="@+id/taskTitleEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter task title..."
+        android:inputType="text"
+        android:padding="16dp"
+        android:background="@android:color/white"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Description Input -->
+    <EditText
+        android:id="@+id/taskDescEditText"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:hint="Enter description here..."
+        android:inputType="textMultiLine"
+        android:gravity="top|start"
+        android:padding="16dp"
+        android:background="@android:color/white"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Deadline Input -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Deadline"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp"/>
+
+    <EditText
+        android:id="@+id/taskDeadlineEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="YYYY-MM-DD"
+        android:inputType="date"
+        android:padding="16dp"
+        android:background="@android:color/white"
+        android:layout_marginBottom="32dp"/>
+
+    <!-- Save Button -->
+    <Button
+        android:id="@+id/saveTaskButton"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Save task!"
+        android:textColor="@android:color/white"
+        android:backgroundTint="#3F1D7A"
+        android:textAllCaps="false"
+        android:textSize="18sp"/>
+
+</LinearLayout>
