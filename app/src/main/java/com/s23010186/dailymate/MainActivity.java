@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         textSignIn = findViewById(R.id.textSignIn);
 
         btnGetStarted.setOnClickListener(v -> {
-            // Navigate to Sign Up Activity (you can create this next)
+            // Navigate to Sign Up Activity
             Intent intent = new Intent(MainActivity.this, SignUpActivity.class);
             startActivity(intent);
         });

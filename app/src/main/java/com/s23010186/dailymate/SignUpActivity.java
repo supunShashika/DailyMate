@@ -2,56 +2,80 @@ package com.s23010186.dailymate;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.*;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class SignUpActivity extends AppCompatActivity {
-    private DatabaseHelper db;
-    private EditText emailEditText, passwordEditText, nameEditText, usernameEditText;
-    private Button signUpButton;
-    private TextView backToLoginText;
+
+    private static final String TAG = "SignUpActivity";
+    EditText emailInput, passwordInput, nameInput, usernameInput;
+    Button signUpButton;
+    TextView backToLogin;
+    DatabaseHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
-        // Initialize views
-        emailEditText = findViewById(R.id.emailEditText);
-        passwordEditText = findViewById(R.id.passwordEditText);
-        nameEditText = findViewById(R.id.nameEditText);
-        usernameEditText = findViewById(R.id.usernameEditText);
-        signUpButton = findViewById(R.id.signUpButton);
-        backToLoginText = findViewById(R.id.backToLoginText);
+        try {
+            dbHelper = new DatabaseHelper(this);
 
-        db = new DatabaseHelper(this);
+            emailInput = findViewById(R.id.signupEmail);
+            passwordInput = findViewById(R.id.signupPassword);
+            nameInput = findViewById(R.id.signupName);
+            usernameInput = findViewById(R.id.signupUsername);
+            signUpButton = findViewById(R.id.btnSignUp);
+            backToLogin = findViewById(R.id.tvBackToLogin);
 
-        signUpButton.setOnClickListener(v -> {
-            String name = nameEditText.getText().toString().trim();
-            String username = usernameEditText.getText().toString().trim();
-            String email = emailEditText.getText().toString().trim();
-            String password = passwordEditText.getText().toString().trim();
+            signUpButton.setOnClickListener(v -> {
+                try {
+                    String email = emailInput.getText().toString().trim().toLowerCase();
+                    String pass = passwordInput.getText().toString().trim();
+                    String name = nameInput.getText().toString().trim();
+                    String user = usernameInput.getText().toString().trim();
 
-            if (name.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
-                return;
-            }
+                    if (email.isEmpty() || pass.isEmpty() || name.isEmpty() || user.isEmpty()) {
+                        Toast.makeText(SignUpActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-            long result = db.addUser(name, username, email, password);
-            if (result > 0) {
-                Toast.makeText(this, "Registration successful", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(SignUpActivity.this, HomeActivity.class);
-                startActivity(intent);
-                finish();
-            } else {
-                Toast.makeText(this, "Registration failed", Toast.LENGTH_SHORT).show();
-            }
-        });
+                    if (pass.length() < 6) {
+                        Toast.makeText(SignUpActivity.this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
-        backToLoginText.setOnClickListener(v -> {
-            Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
-            startActivity(intent);
-            finish();
-        });
+                    if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                        Toast.makeText(SignUpActivity.this, "Please enter a valid email", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    boolean isRegistered = dbHelper.insertUser(email, pass, name, user);
+                    if (isRegistered) {
+                        Log.d(TAG, "User registered successfully: " + email);
+                        Toast.makeText(SignUpActivity.this, "Registration Successful!", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
+                        finish();
+                    } else {
+                        Log.w(TAG, "Registration failed: user may already exist");
+                        Toast.makeText(SignUpActivity.this, "User already exists. Try logging in.", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error during sign up: " + e.getMessage(), e);
+                    Toast.makeText(SignUpActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            backToLogin.setOnClickListener(v -> finish());
+        } catch (Exception e) {
+            Log.e(TAG, "Error in onCreate: " + e.getMessage(), e);
+            e.printStackTrace();
+            Toast.makeText(this, "Initialization error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 }
