@@ -37,7 +37,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         Log.d(TAG, "DatabaseHelper initialized");
-        SQLiteDatabase db = this.getWritableDatabase();
+        this.getWritableDatabase();
     }
 
     @Override
@@ -71,7 +71,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.d(TAG, "Tasks table created");
         } catch (Exception e) {
             Log.e(TAG, "Error creating tables: " + e.getMessage(), e);
-            e.printStackTrace();
         }
     }
 
@@ -100,10 +99,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // ==========================================
 
     public boolean insertTask(String title, String description, String deadline, double lat, double lng,int userId) {
-        SQLiteDatabase db = null;
         Cursor userCheck = null;
         try {
-            db = this.getWritableDatabase();
+            SQLiteDatabase db = this.getWritableDatabase();
             
             // Verify user exists
             userCheck = db.query(TABLE_USERS, new String[]{COL_USER_ID}, COL_USER_ID + " = ?",
@@ -135,7 +133,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return result != -1;
         } catch (Exception e) {
             Log.e(TAG, "Error inserting task: " + e.getMessage(), e);
-            e.printStackTrace();
             return false;
         } finally {
             if (userCheck != null) {
@@ -196,9 +193,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public boolean insertUser(String email, String password, String name, String username) {
-        SQLiteDatabase db = null;
         try {
-            db = this.getWritableDatabase();
+            SQLiteDatabase db = this.getWritableDatabase();
             ContentValues values = new ContentValues();
             values.put(COL_EMAIL, email);
             values.put(COL_PASSWORD, password);
@@ -322,6 +318,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Use LIKE for partial matches
         String query = "SELECT * FROM " + TABLE_TASKS + " WHERE " + COLUMN_USER_ID + " = ? AND " + COLUMN_TITLE + " LIKE ?";
         return db.rawQuery(query, new String[]{String.valueOf(userId), "%" + keyword + "%"});
+    }
+
+    // ==========================================
+    //              NEW USER METHOD
+    // ==========================================
+
+    public boolean updatePassword(String email, String currentPassword, String newPassword) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // First, check if a user exists with this email and current password
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS + " WHERE " + COL_EMAIL
+                + " = ? AND " + COL_PASSWORD + " = ?", new String[]{email, currentPassword});
+
+        try {
+            if (cursor.getCount() > 0) {
+                // The user verified their identity, now update the password
+                ContentValues values = new ContentValues();
+                values.put(COL_PASSWORD, newPassword);
+
+                // Update the row where the email matches
+                int result = db.update(TABLE_USERS, values, COL_EMAIL + " = ?", new String[]{email});
+                return result > 0;
+            }
+            // Return false if the email or current password was wrong
+            return false;
+        } finally {
+            cursor.close();
+        }
     }
 
 
