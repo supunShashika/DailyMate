@@ -2,12 +2,12 @@ package com.s23010186.dailymate;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.Toast;
-
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -15,8 +15,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 public class AccountActivity extends AppCompatActivity {
 
     private static final String TAG = "AccountActivity";
+    TextView tvName, tvUsername;
+    DatabaseHelper dbHelper;
+    int currentUserId = -1;
     Button btnEditDetails, btnChangePassword, btnLogout;
-    ImageButton backButton;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +28,14 @@ public class AccountActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
         bottomNavigationView.setSelectedItemId(R.id.nav_settings); // Highlight Account
+
+        dbHelper = new DatabaseHelper(this);
+        tvName = findViewById(R.id.tvAccountName);
+        tvUsername = findViewById(R.id.tvAccountUsername);
+
+        // --- NEW: Fetch the logged-in User ID ---
+        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+        currentUserId = prefs.getInt("userId", -1);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
@@ -49,9 +60,8 @@ public class AccountActivity extends AppCompatActivity {
             btnEditDetails = findViewById(R.id.btnEditDetails);
             btnChangePassword = findViewById(R.id.btnChangePassword);
             btnLogout = findViewById(R.id.btnLogout);
-            backButton = findViewById(R.id.backButton);
 
-            if (btnEditDetails == null || btnChangePassword == null || btnLogout == null || backButton == null) {
+            if (btnEditDetails == null || btnChangePassword == null || btnLogout == null) {
                 Log.e(TAG, "One or more UI elements not found");
                 Toast.makeText(this, "Layout error", Toast.LENGTH_SHORT).show();
                 finish();
@@ -80,7 +90,7 @@ public class AccountActivity extends AppCompatActivity {
 
             btnLogout.setOnClickListener(v -> {
                 try {
-                    SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
+                    // SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE); // Already declared above
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.remove("userId");
                     editor.remove("email");
@@ -96,11 +106,38 @@ public class AccountActivity extends AppCompatActivity {
                 }
             });
 
-            backButton.setOnClickListener(v -> finish());
         } catch (Exception e) {
             Log.e(TAG, "Error in onCreate: " + e.getMessage(), e);
             e.printStackTrace();
             Toast.makeText(this, "Initialization error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // ==========================================
+    // ADDED METHODS FOR LOADING USER PROFILE
+    // ==========================================
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Automatically fetch and update the name every time this screen becomes visible
+        if (currentUserId != -1) {
+            loadUserProfile(currentUserId);
+        }
+    }
+
+    private void loadUserProfile(int userId) {
+        Cursor cursor = dbHelper.getUserDetails(userId);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+            String username = cursor.getString(cursor.getColumnIndexOrThrow("username"));
+
+            // Update the TextViews
+            tvName.setText(name);
+            tvUsername.setText("@" + username);
+
+            cursor.close();
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.s23010186.dailymate;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,6 +8,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 public class AddTaskActivity extends AppCompatActivity {
 
@@ -16,11 +19,29 @@ public class AddTaskActivity extends AppCompatActivity {
     private double currentLat = 0.0;
     private double currentLng = 0.0;
     DatabaseHelper dbHelper;
+    private ActivityResultLauncher<Intent> mapLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_task);
+
+        // Create a launcher to handle the result from MapActivity
+        mapLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        currentLat = result.getData().getDoubleExtra("LAT", 0.0);
+                        currentLng = result.getData().getDoubleExtra("LNG", 0.0);
+
+                        // Update button text to show success
+                        Button btnGetLocation = findViewById(R.id.btnGetLocation);
+                        if (btnGetLocation != null) {
+                            btnGetLocation.setText("Location Picked: " + String.format("%.4f", currentLat) + ", " + String.format("%.4f", currentLng));
+                            btnGetLocation.setBackgroundTintList(getResources().getColorStateList(android.R.color.holo_green_dark));
+                        }
+                    }
+                });
 
         try {
             // Initialize Database
@@ -33,17 +54,18 @@ public class AddTaskActivity extends AppCompatActivity {
             saveTaskBtn = findViewById(R.id.saveTaskButton);
             Button btnGetLocation = findViewById(R.id.btnGetLocation);
 
-            btnGetLocation.setOnClickListener(v -> {
-                // For a full app, request Manifest.permission.ACCESS_FINE_LOCATION first
-                // If you are using MapActivity, you would launch it here via startActivityForResult
-                // For now, we simulate capturing a location (e.g., Colombo, Sri Lanka)
-                currentLat = 6.9271;
-                currentLng = 79.8612;
-                Toast.makeText(this, "Location Captured!", Toast.LENGTH_SHORT).show();
-            });
+            if (btnGetLocation != null) {
+                btnGetLocation.setOnClickListener(v -> {
+                    Intent intent = new Intent(AddTaskActivity.this, MapActivity.class);
+                    intent.putExtra("MODE", "PICK");
+                    mapLauncher.launch(intent); // Launch map in PICK mode
+                });
+            }
 
 
-            if (titleInput == null || descInput == null || deadlineInput == null || saveTaskBtn == null) {
+
+
+            if (titleInput == null || descInput == null || deadlineInput == null || saveTaskBtn == null || btnGetLocation == null) {
                 Log.e(TAG, "One or more UI elements not found");
                 Toast.makeText(this, "Layout error", Toast.LENGTH_SHORT).show();
                 finish();
@@ -89,6 +111,8 @@ public class AddTaskActivity extends AppCompatActivity {
                         Log.d(TAG, "Task inserted successfully");
                         Toast.makeText(AddTaskActivity.this, "Task Saved!", Toast.LENGTH_SHORT).show();
                         finish(); // Closes screen and returns to Home
+
+                        NotificationUtils.sendNotification(this, "Task Added", "You added: " + title);
                     } else {
                         Log.e(TAG, "Failed to insert task");
                         Toast.makeText(AddTaskActivity.this, "Error: Failed to save task. Check logs for details.", Toast.LENGTH_LONG).show();
@@ -105,4 +129,5 @@ public class AddTaskActivity extends AppCompatActivity {
             Toast.makeText(this, "Initialization error: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
+
 }

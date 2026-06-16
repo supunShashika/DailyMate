@@ -101,14 +101,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public boolean insertTask(String title, String description, String deadline, double lat, double lng,int userId) {
         SQLiteDatabase db = null;
+        Cursor userCheck = null;
         try {
             db = this.getWritableDatabase();
             
             // Verify user exists
-            Cursor userCheck = db.query(TABLE_USERS, new String[]{COL_USER_ID}, COL_USER_ID + " = ?",
+            userCheck = db.query(TABLE_USERS, new String[]{COL_USER_ID}, COL_USER_ID + " = ?",
                     new String[]{String.valueOf(userId)}, null, null, null);
             boolean userExists = userCheck.getCount() > 0;
-            userCheck.close();
             
             if (!userExists) {
                 Log.e(TAG, "User with ID " + userId + " does not exist");
@@ -137,6 +137,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.e(TAG, "Error inserting task: " + e.getMessage(), e);
             e.printStackTrace();
             return false;
+        } finally {
+            if (userCheck != null) {
+                userCheck.close();
+            }
         }
     }
 
@@ -302,8 +306,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Get a single task by its ID
     public Cursor getTaskById(int taskId) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT * FROM " + TABLE_TASKS + " WHERE " + COLUMN_ID + " = ?",
-                new String[]{String.valueOf(taskId)});
+        try {
+            SQLiteDatabase db = this.getReadableDatabase();
+            return db.rawQuery("SELECT * FROM " + TABLE_TASKS + " WHERE " + COLUMN_ID + " = ?",
+                    new String[]{String.valueOf(taskId)});
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting task by ID: " + e.getMessage(), e);
+            return null;
+        }
     }
+
+    // Search tasks by title
+    public Cursor searchTasks(int userId, String keyword) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        // Use LIKE for partial matches
+        String query = "SELECT * FROM " + TABLE_TASKS + " WHERE " + COLUMN_USER_ID + " = ? AND " + COLUMN_TITLE + " LIKE ?";
+        return db.rawQuery(query, new String[]{String.valueOf(userId), "%" + keyword + "%"});
+    }
+
+
 }

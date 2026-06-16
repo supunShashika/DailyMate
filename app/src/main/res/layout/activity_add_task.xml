@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#D6ECF3"
     android:padding="24dp">
 
     <TextView
@@ -45,7 +46,7 @@
         android:layout_height="wrap_content"
         android:text="Capture Current Location"
         android:drawableLeft="@android:drawable/ic_menu_mylocation"
-        android:backgroundTint="#007BFF"
+        android:backgroundTint="#11a800"
         android:textColor="@android:color/white"
         android:layout_marginBottom="32dp"/>
 
@@ -54,7 +55,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="Save Task"
-        android:backgroundTint="@color/black"
+        android:backgroundTint="#063970"
         android:textColor="@android:color/white"/>
 
 </LinearLayout>

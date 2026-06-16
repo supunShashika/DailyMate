@@ -3,8 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -35,7 +37,7 @@
             android:name=".TaskDetailsActivity"
             android:exported="false" />
         <activity
-            android:name=".NotificationActivity"
+            android:name=".NotificationUtils"
             android:exported="false" />
         <activity
             android:name=".ChangeAccountActivity"
@@ -67,7 +69,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/my_api_key"/>
+            android:value="AIzaSyDE8QBgEUNQOLFglJTGu2bOxVAzoSY7DX8"/>
 
     </application>
 

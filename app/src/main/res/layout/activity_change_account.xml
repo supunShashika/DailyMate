@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="24dp"
+    android:background="#D6ECF3"
     android:gravity="center_horizontal">
 
     <TextView
@@ -44,11 +45,11 @@
 
     <Button
         android:id="@+id/btnSaveChanges"
-        android:layout_width="match_parent"
+        android:layout_width="500px"
         android:layout_height="50dp"
         android:text="Save Changes"
         android:textSize="16sp"
-        android:backgroundTint="@color/black"
+        android:backgroundTint="#063970"
         android:textColor="@android:color/white"/>
 
 </LinearLayout>

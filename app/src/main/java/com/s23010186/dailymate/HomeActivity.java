@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,14 +24,31 @@ public class HomeActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     ArrayList<TaskModel> taskList;
     TaskAdapter adapter;
+    TextView tvGreeting;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        // Assuming you have an ImageButton with id btnSearch in activity_home.xml
+        ImageButton btnSearch = findViewById(R.id.btnSearch);
+        btnSearch.setOnClickListener(v -> {
+            startActivity(new Intent(HomeActivity.this, SearchActivity.class));
+        });
+
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
         bottomNavigationView.setSelectedItemId(R.id.nav_home); // Highlight Home
+
+        // Create the notification channel
+        NotificationUtils.createNotificationChannel(this);
+
+        // Request permission for Android 13+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
@@ -170,6 +189,8 @@ public class HomeActivity extends AppCompatActivity {
                         taskList.remove(position);
                         adapter.notifyItemRemoved(position);
                         Toast.makeText(HomeActivity.this, "Task Completed!", Toast.LENGTH_SHORT).show();
+
+                        NotificationUtils.sendNotification(HomeActivity.this, "Task Completed!", "Great job finishing a task!");
                     }
                 }
 
