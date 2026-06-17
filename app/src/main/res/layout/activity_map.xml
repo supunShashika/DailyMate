@@ -15,7 +15,7 @@
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:layout_margin="16dp"
-        android:backgroundTint="@color/black"
+        android:backgroundTint="#3F1D7A"
         android:text="Confirm Location"
         android:textColor="@android:color/white"
         android:visibility="gone" /> </RelativeLayout>
