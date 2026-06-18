@@ -113,9 +113,9 @@ public class AccountActivity extends AppCompatActivity {
         }
     }
 
-    // ==========================================
+
     // ADDED METHODS FOR LOADING USER PROFILE
-    // ==========================================
+
 
     @Override
     protected void onResume() {
